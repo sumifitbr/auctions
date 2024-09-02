@@ -22,13 +22,11 @@ engine = create_engine(connection_string)
 
 # Função de autenticação
 def authenticate(username, password):
-    if username == "admin" and password == "password123":
-        return True
-    return False
+    return username == "admin" and password == "password123"
 
 # Tela de login
 def login():
-    st.title("Auctions - Login")
+    st.title("Login")
 
     username = st.text_input("Usuário")
     password = st.text_input("Senha", type="password")
@@ -51,7 +49,7 @@ if not st.session_state.authenticated:
     login()
 else:
     # Título da aplicação
-    st.sidebar.title("Auctions Online")
+    st.title("Auctions Online")
 
     # Sidebar com filtros
     st.sidebar.header("Filtros")
@@ -92,77 +90,82 @@ else:
 
     df = load_data()
 
-    # Filtros dependentes
-    estado_selecionado = st.sidebar.selectbox("Selecione o estado", sorted(df["estado"].unique()))
-    cidades_filtradas = df[df["estado"] == estado_selecionado]["cidade"].unique()
-    cidade_selecionada = st.sidebar.selectbox("Selecione a cidade", sorted(cidades_filtradas))
-    bairros_filtrados = df[(df["estado"] == estado_selecionado) & (df["cidade"] == cidade_selecionada)]["bairro"].unique()
-    bairro_selecionado = st.sidebar.selectbox("Selecione o bairro", sorted(bairros_filtrados))
-
-    # Filtro de slider para valor do imóvel
-    valor_minimo, valor_maximo = st.sidebar.slider("Valor do Imóvel", 0, 1000000, (0, 1000000))
-
-    # Filtro por modalidade de venda
-    modalidade_selecionada = st.sidebar.selectbox("Modalidade de Venda", sorted(df["modalidade_venda"].unique()))
-
-    # Filtrar o DataFrame com base nos filtros selecionados
-    df_filtrado = df[
-        (df["estado"] == estado_selecionado) &
-        (df["cidade"] == cidade_selecionada) &
-        (df["bairro"] == bairro_selecionado) &
-        (df["valor_imovel"] >= valor_minimo) &
-        (df["valor_imovel"] <= valor_maximo) &
-        (df["modalidade_venda"] == modalidade_selecionada)
-    ]
-
-    # Verificar se o DataFrame filtrado está vazio
-    if df_filtrado.empty:
-        st.write("Nenhum imóvel encontrado para os critérios selecionados.")
+    # Garantir que o DataFrame não esteja vazio antes de definir os filtros
+    if df.empty:
+        st.write("Nenhum dado disponível.")
     else:
-        # Layout de colunas para exibir a tabela e o gráfico lado a lado
-        col1, col2 = st.columns([2, 3])
+        # Filtros dependentes com dados disponíveis
+        estados_disponiveis = sorted(df["estado"].unique())
+        estado_selecionado = st.sidebar.selectbox("Selecione o estado", estados_disponiveis)
+        cidades_filtradas = sorted(df[df["estado"] == estado_selecionado]["cidade"].unique())
+        cidade_selecionada = st.sidebar.selectbox("Selecione a cidade", cidades_filtradas)
+        bairros_filtrados = sorted(df[(df["estado"] == estado_selecionado) & (df["cidade"] == cidade_selecionada)]["bairro"].unique())
+        bairro_selecionado = st.sidebar.selectbox("Selecione o bairro", bairros_filtrados)
 
-        with col1:
-            st.subheader("Total de Imóveis por Região")
-            total_regiao = df_filtrado.groupby("regiao")["regiao"].count().reset_index(name="Total de Imóveis")
-            st.dataframe(total_regiao)
+        # Filtro de slider para valor do imóvel
+        valor_minimo, valor_maximo = st.sidebar.slider("Valor do Imóvel", 0, 1000000, (0, 1000000))
 
-        with col2:
-            st.subheader("Distribuição de Imóveis por Estado")
-            fig, ax = plt.subplots(figsize=(10, 6))  # Ajusta o tamanho do gráfico
-            df_filtrado.groupby("estado")["estado"].count().plot(kind='bar', ax=ax)
-            ax.set_ylabel("Número de Imóveis")
-            ax.set_xlabel("Estado")
-            st.pyplot(fig)
+        # Filtro por modalidade de venda
+        modalidade_selecionada = st.sidebar.selectbox("Modalidade de Venda", sorted(df["modalidade_venda"].unique()))
 
-        # Ajustar rótulos e formatação
-        df_filtrado = df_filtrado.rename(columns={
-            "estado": "Estado",
-            "cidade": "Cidade",
-            "bairro": "Bairro",
-            "modalidade_venda": "Modalidade de Venda",
-            "valor_imovel": "Valor Imóvel",
-            "regiao": "Região",
-            "link_acesso": "Link"
-        })
+        # Filtrar o DataFrame com base nos filtros selecionados
+        df_filtrado = df[
+            (df["estado"] == estado_selecionado) &
+            (df["cidade"] == cidade_selecionada) &
+            (df["bairro"] == bairro_selecionado) &
+            (df["valor_imovel"] >= valor_minimo) &
+            (df["valor_imovel"] <= valor_maximo) &
+            (df["modalidade_venda"] == modalidade_selecionada)
+        ]
 
-        # Formatação do valor do imóvel para BRL
-        df_filtrado["Valor Imóvel"] = df_filtrado["Valor Imóvel"].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+        # Se nenhum dado for encontrado após filtragem, mostrar mensagem
+        if df_filtrado.empty:
+            st.write("Nenhum imóvel encontrado para os critérios selecionados.")
+        else:
+            # Layout de colunas para exibir a tabela e o gráfico lado a lado
+            col1, col2 = st.columns([2, 3])
 
-        # Tornar os links clicáveis com label "SAIBA MAIS"
-        df_filtrado["Link"] = df_filtrado["Link"].apply(lambda x: f'<a href="{x}" target="_blank">SAIBA MAIS</a>')
+            with col1:
+                st.subheader("Total de Imóveis por Região")
+                total_regiao = df.groupby("regiao")["regiao"].count().reset_index(name="Total de Imóveis")
+                st.dataframe(total_regiao)
 
-        # Exibir a tabela de imóveis filtrados com ajustes de largura
-        st.subheader("Imóveis Filtrados")
-        st.markdown(
-            df_filtrado.to_html(escape=False, index=False), 
-            unsafe_allow_html=True
-        )
+            with col2:
+                st.subheader("Distribuição de Imóveis por Estado")
+                fig, ax = plt.subplots(figsize=(10, 6))  # Ajusta o tamanho do gráfico
+                df.groupby("estado")["estado"].count().plot(kind='bar', ax=ax)
+                ax.set_ylabel("Número de Imóveis")
+                ax.set_xlabel("Estado")
+                st.pyplot(fig)
 
-    # Botão para logout
-    if st.sidebar.button("Logout"):
-        st.session_state.authenticated = False
-        st.session_state.query_params = {"authenticated": "false"}
+            # Ajustar rótulos e formatação
+            df_filtrado = df_filtrado.rename(columns={
+                "estado": "Estado",
+                "cidade": "Cidade",
+                "bairro": "Bairro",
+                "modalidade_venda": "Modalidade de Venda",
+                "valor_imovel": "Valor Imóvel",
+                "regiao": "Região",
+                "link_acesso": "Link"
+            })
+
+            # Formatação do valor do imóvel para BRL
+            df_filtrado["Valor Imóvel"] = df_filtrado["Valor Imóvel"].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+
+            # Tornar os links clicáveis com label "SAIBA MAIS"
+            df_filtrado["Link"] = df_filtrado["Link"].apply(lambda x: f'<a href="{x}" target="_blank">SAIBA MAIS</a>')
+
+            # Exibir a tabela de imóveis filtrados com ajustes de largura
+            st.subheader("Imóveis Filtrados")
+            st.markdown(
+                df_filtrado.to_html(escape=False, index=False), 
+                unsafe_allow_html=True
+            )
+
+        # Botão para logout
+        if st.sidebar.button("Logout"):
+            st.session_state.authenticated = False
+            st.session_state.query_params = {"authenticated": "false"}
 
     # Fechar a conexão com o banco de dados
     engine.dispose()
