@@ -68,7 +68,7 @@ else:
             CASE 
               WHEN i.estado IN ('AM','RR','AP','PA','TO','RO','AC') THEN 'Norte'
               WHEN i.estado IN ('MA','PI','CE','RN','PE','PB','SE','AL','BA') THEN 'Nordeste'
-              WHEN i.estado IN ('MT','MS','GO') THEN 'Centro-oeste'
+              WHEN i.estado IN ('MT','MS','GO','DF') THEN 'Centro-oeste'
               WHEN i.estado IN ('SP','RJ','MG','ES') THEN 'Sudeste'
               WHEN i.estado IN ('PR','SC','RS') THEN 'Sul'
               ELSE 'Favor Classificar' 
