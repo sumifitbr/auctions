@@ -73,7 +73,8 @@ else:
               WHEN i.estado IN ('PR','SC','RS') THEN 'Sul'
               ELSE 'Favor Classificar' 
             END AS regiao,
-            i."Link de acesso" AS link_acesso
+            i."Link de acesso" AS link_acesso,
+            i.etl_load_date as etl_load_date
           FROM tbl_imoveis i
         )
         SELECT 
@@ -83,8 +84,18 @@ else:
           modalidade_venda,
           valor_imovel,
           regiao,
-          link_acesso
+          link_acesso,
+          max(etl_load_date)
         FROM leiloes
+        group by
+            estado,
+            cidade,
+            bairro,
+            modalidade_venda,
+            valor_imovel,
+            regiao,
+            link_acesso
+            order by estado
         """
         return pd.read_sql(query, engine)
 
