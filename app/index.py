@@ -3,6 +3,12 @@ import pandas as pd
 from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
 
+# Configuração da página
+st.set_page_config(
+    page_title="Auctions Online",
+    page_icon=":house:",  # Alternativamente, você pode usar um caminho para um favicon, por exemplo: "assets/favicon.ico"
+)
+
 # Configurações de conexão com o banco de dados
 db_user = "postgres"
 db_password = "Last$1981"
