@@ -183,9 +183,8 @@ else:
             st.session_state.query_params = {"authenticated": "false"}
         
         # Exibe data de atualização
-        update_date = df['etl_load_date']
-        # Adicionar um texto pequeno com a data de atualização
-        st.sidebar.markdown(f"**Data de Atualização:** {update_date.strftime('%Y-%m-%d %H:%M:%S')}", unsafe_allow_html=True)
+        latest_update_date = df['etl_load_date'].max()  # Obter a data mais recente
+        st.sidebar.markdown(f"**Atualização:** {latest_update_date.strftime('%Y-%m-%d %H:%M:%S')}", unsafe_allow_html=True)
 
     # Fechar a conexão com o banco de dados
     engine.dispose()
