@@ -168,7 +168,7 @@ else:
             df_filtrado["Link"] = df_filtrado["Link"].apply(lambda x: f'<a href="{x}" target="_blank">SAIBA MAIS</a>')
 
             # Drop coluna de etl_load do df_filtrado
-            df_filtrado = df_filtrado.drop['etl_load_date']
+            df_filtrado = df_filtrado.drop(columns=['etl_load_date'])
 
             # Exibir a tabela de imóveis filtrados com ajustes de largura
             st.subheader("Imóveis Filtrados")
