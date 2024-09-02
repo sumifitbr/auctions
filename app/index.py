@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 # Configuração da página
 st.set_page_config(
@@ -85,7 +86,7 @@ else:
           valor_imovel,
           regiao,
           link_acesso,
-          max(etl_load_date)
+          max(etl_load_date) as etl_load_date
         FROM leiloes
         group by
             estado,
@@ -166,6 +167,9 @@ else:
             # Tornar os links clicáveis com label "SAIBA MAIS"
             df_filtrado["Link"] = df_filtrado["Link"].apply(lambda x: f'<a href="{x}" target="_blank">SAIBA MAIS</a>')
 
+            # Drop coluna de etl_load do df_filtrado
+            df_filtrado = df_filtrado.drop['etl_load_date']
+
             # Exibir a tabela de imóveis filtrados com ajustes de largura
             st.subheader("Imóveis Filtrados")
             st.markdown(
@@ -177,6 +181,10 @@ else:
         if st.sidebar.button("Logout"):
             st.session_state.authenticated = False
             st.session_state.query_params = {"authenticated": "false"}
+        
+        # Exibe data de atualização
+        update_date = df['etl_load_date']
+        st.sidebar.title(str(update_date).strftime('%Y-%M-%D %H:%M:%S'))
 
     # Fechar a conexão com o banco de dados
     engine.dispose()
