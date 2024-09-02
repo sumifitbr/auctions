@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
-from datetime import datetime
+import datetime
 
 # Configuração da página
 st.set_page_config(
@@ -184,7 +184,8 @@ else:
         
         # Exibe data de atualização
         update_date = df['etl_load_date']
-        st.sidebar.title(str(update_date).strftime('%Y-%M-%D %H:%M:%S'))
+        # Adicionar um texto pequeno com a data de atualização
+        st.sidebar.markdown(f"**Data de Atualização:** {update_date.strftime('%Y-%m-%d %H:%M:%S')}", unsafe_allow_html=True)
 
     # Fechar a conexão com o banco de dados
     engine.dispose()
