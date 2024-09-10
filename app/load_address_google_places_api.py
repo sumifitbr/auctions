@@ -19,7 +19,7 @@ def buscar_enderecos():
     cursor = conn.cursor()
 
     # Consultar a tabela "leiloes" para obter os endereços
-    cursor.execute("SELECT i."Endereço" as endereco FROM tbl_imoveis i")
+    cursor.execute("SELECT i.'Endereço' as endereco FROM tbl_imoveis i")
     enderecos = cursor.fetchall()
 
     # Fechar a conexão com o banco de dados
